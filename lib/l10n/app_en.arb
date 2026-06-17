@@ -8,5 +8,14 @@
   "refresh": "Refresh",
   "errorLoading": "Loading error",
   "retry": "Try again",
-  "myRegion": "My region"
+  "myRegion": "My region",
+  "alertTypeAirRaid": "Air raid alert",
+  "alertTypeArtillery": "Artillery shelling threat",
+  "alertTypeUrbanFights": "Urban fights",
+  "alertTypeChemical": "Chemical threat",
+  "alertTypeNuclear": "Nuclear threat",
+  "alertTypeUnknown": "Threat",
+  "alertShelter": "Please proceed to shelter",
+  "alertChemicalShelter": "Seal the premises!",
+  "alertNuclearShelter": "Immediately to shelter!"
 }

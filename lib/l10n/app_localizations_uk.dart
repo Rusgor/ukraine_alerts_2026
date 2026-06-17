@@ -35,4 +35,31 @@ class AppLocalizationsUk extends AppLocalizations {
 
   @override
   String get myRegion => 'Моя область';
+
+  @override
+  String get alertTypeAirRaid => 'Повітряна тривога';
+
+  @override
+  String get alertTypeArtillery => 'Загроза артилерійського обстрілу';
+
+  @override
+  String get alertTypeUrbanFights => 'Вуличні бої';
+
+  @override
+  String get alertTypeChemical => 'Хімічна загроза';
+
+  @override
+  String get alertTypeNuclear => 'Ядерна загроза';
+
+  @override
+  String get alertTypeUnknown => 'Загроза';
+
+  @override
+  String get alertShelter => 'Будь ласка, пройдіть до укриття';
+
+  @override
+  String get alertChemicalShelter => 'Герметизуйте приміщення!';
+
+  @override
+  String get alertNuclearShelter => 'Негайно до укриття!';
 }

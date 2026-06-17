@@ -43,11 +43,20 @@ class _RegionAlertsView extends StatelessWidget {
           ),
           child: Scaffold(
             backgroundColor: Colors.transparent,
-            appBar: AlertsAppBar(
-              title: l10n.regionAlerts,
-              onRefresh: () => context.read<RegionAlertsCubit>().refresh(),
-              backgroundColor: colors.first.withValues(alpha: 0.7),
-              foregroundColor: _getForegroundColor(state),
+            appBar: PreferredSize(
+              preferredSize: const Size.fromHeight(kToolbarHeight),
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 600),
+                color: colors.first.withValues(alpha: 0.1),
+                child: AlertsAppBar(
+                  title: l10n.regionAlerts,
+                  onRefresh: state is RegionAlertsInitial
+                      ? null
+                      : () => context.read<RegionAlertsCubit>().refresh(),
+                  backgroundColor: Colors.transparent,
+                  foregroundColor: _getForegroundColor(state),
+                ),
+              ),
             ),
             body: Column(
               children: [
@@ -55,8 +64,13 @@ class _RegionAlertsView extends StatelessWidget {
                   padding: const EdgeInsets.all(AppSizes.paddingL),
                   child: RegionDropdown(
                     selectedUid: context.read<RegionAlertsCubit>().currentUid,
+                    isInitial: state is RegionAlertsInitial,
                     onSelected: (uid) {
-                      context.read<RegionAlertsCubit>().checkAlert(uid);
+                      if (uid == null) {
+                        context.read<RegionAlertsCubit>().clearSelection();
+                      } else {
+                        context.read<RegionAlertsCubit>().checkAlert(uid);
+                      }
                     },
                   ),
                 ),
@@ -70,32 +84,29 @@ class _RegionAlertsView extends StatelessWidget {
   }
 
   List<Color> _getColors(RegionAlertsState state) => switch (state) {
-        RegionAlertsLoaded(isAlert: true) => [
-            AppColors.alertGradientTop,
-            AppColors.alertGradientBottom,
-          ],
-        RegionAlertsLoaded(isAlert: false) => [
-            AppColors.noAlertGradientTop,
-            AppColors.noAlertGradientBottom,
-          ],
-        RegionAlertsLoading(previousAlert: true) => [
-            AppColors.alertGradientTop,
-            AppColors.alertGradientBottom,
-          ],
-        RegionAlertsLoading(previousAlert: false) => [
-            AppColors.noAlertGradientTop,
-            AppColors.noAlertGradientBottom,
-          ],
-        _ => [
-            AppColors.regionInitialBackground,
-            AppColors.regionInitialBackground,
-          ],
-      };
+    RegionAlertsLoaded(isAlert: true) => [
+      AppColors.alertGradientTop,
+      AppColors.alertGradientBottom,
+    ],
+    RegionAlertsLoaded(isAlert: false) => [
+      AppColors.noAlertGradientTop,
+      AppColors.noAlertGradientBottom,
+    ],
+    RegionAlertsLoading(previousAlert: true) => [
+      AppColors.alertGradientTop,
+      AppColors.alertGradientBottom,
+    ],
+    RegionAlertsLoading(previousAlert: false) => [
+      AppColors.noAlertGradientTop,
+      AppColors.noAlertGradientBottom,
+    ],
+    _ => [AppColors.regionInitialTop, AppColors.regionInitialBottom],
+  };
 
   Color _getForegroundColor(RegionAlertsState state) => switch (state) {
-        RegionAlertsLoaded() => AppColors.textWhite,
-        RegionAlertsLoading(previousAlert: true) => AppColors.textWhite,
-        RegionAlertsLoading(previousAlert: false) => AppColors.textWhite,
-        _ => AppColors.textDark,
-      };
+    RegionAlertsLoaded() => AppColors.textWhite,
+    RegionAlertsLoading(previousAlert: true) => AppColors.textWhite,
+    RegionAlertsLoading(previousAlert: false) => AppColors.textWhite,
+    _ => AppColors.textDark,
+  };
 }

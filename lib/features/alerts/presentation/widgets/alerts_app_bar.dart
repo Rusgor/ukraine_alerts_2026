@@ -5,13 +5,13 @@ class AlertsAppBar extends StatelessWidget implements PreferredSizeWidget {
   const AlertsAppBar({
     super.key,
     required this.title,
-    required this.onRefresh,
+    this.onRefresh,
     this.backgroundColor,
     this.foregroundColor,
   });
 
   final String title;
-  final VoidCallback onRefresh;
+  final VoidCallback? onRefresh;
   final Color? backgroundColor;
   final Color? foregroundColor;
 
@@ -26,6 +26,7 @@ class AlertsAppBar extends StatelessWidget implements PreferredSizeWidget {
       backgroundColor: backgroundColor ?? Colors.transparent,
       foregroundColor: fgColor,
       title: Text(
+        textAlign: TextAlign.center,
         title,
         style: TextStyle(
           fontWeight: FontWeight.bold,
@@ -34,10 +35,11 @@ class AlertsAppBar extends StatelessWidget implements PreferredSizeWidget {
         ),
       ),
       actions: [
-        IconButton(
-          onPressed: onRefresh,
-          icon: Icon(Icons.refresh, color: fgColor),
-        ),
+        if (onRefresh != null)
+          IconButton(
+            onPressed: onRefresh,
+            icon: Icon(Icons.refresh, color: fgColor),
+          ),
       ],
     );
   }

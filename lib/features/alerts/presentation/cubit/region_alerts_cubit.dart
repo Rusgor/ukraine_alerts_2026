@@ -41,7 +41,16 @@ class RegionAlertsCubit extends Cubit<RegionAlertsState> {
 
     try {
       final status = await _repository.getRegionAlertStatus(uid);
-      emit(RegionAlertsLoaded(isAlert: status.contains('A')));
+      if (status.contains('A')) {
+        final alerts = await _repository.getActiveAlerts();
+        final match = alerts.where((a) => a.locationUid == uid).firstOrNull;
+        emit(RegionAlertsLoaded(
+          isAlert: true,
+          alertType: match?.alertType,
+        ));
+      } else {
+        emit(RegionAlertsLoaded(isAlert: false));
+      }
     } on ApiError catch (e) {
       emit(RegionAlertsError(e.message));
     } on Exception catch (e) {
@@ -53,6 +62,11 @@ class RegionAlertsCubit extends Cubit<RegionAlertsState> {
     if (_currentUid != null) {
       await checkAlert(_currentUid!);
     }
+  }
+
+  void clearSelection() {
+    _currentUid = null;
+    emit(RegionAlertsInitial());
   }
 
   Future<void> setMyRegion(String uid) async {

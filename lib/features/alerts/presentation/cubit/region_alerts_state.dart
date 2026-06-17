@@ -9,9 +9,10 @@ final class RegionAlertsLoading implements RegionAlertsState {
 }
 
 final class RegionAlertsLoaded implements RegionAlertsState {
-  RegionAlertsLoaded({required this.isAlert});
+  RegionAlertsLoaded({required this.isAlert, this.alertType});
 
   final bool isAlert;
+  final String? alertType;
 }
 
 final class RegionAlertsError implements RegionAlertsState {

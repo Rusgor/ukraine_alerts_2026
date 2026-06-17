@@ -82,7 +82,7 @@ class _AlertTile extends StatelessWidget {
       ),
       child: Row(
         children: [
-          const Icon(Icons.warning_amber_rounded, color: Colors.deepOrange),
+          Icon(_alertIcon(alert.alertType), color: _alertColor(alert.alertType)),
           const SizedBox(width: AppSizes.paddingM),
           Expanded(
             child: Column(
@@ -110,4 +110,22 @@ class _AlertTile extends StatelessWidget {
       ),
     );
   }
+
+  static IconData _alertIcon(String type) => switch (type) {
+        'air_raid' => Icons.warning_amber_rounded,
+        'artillery_shelling' => Icons.gps_fixed,
+        'urban_fights' => Icons.dangerous,
+        'chemical' => Icons.science,
+        'nuclear' => Icons.radio_button_checked,
+        _ => Icons.warning_amber_rounded,
+      };
+
+  static Color _alertColor(String type) => switch (type) {
+        'air_raid' => Colors.deepOrange,
+        'artillery_shelling' => Colors.orange,
+        'urban_fights' => Colors.red,
+        'chemical' => Colors.green.shade700,
+        'nuclear' => Colors.purple,
+        _ => Colors.deepOrange,
+      };
 }

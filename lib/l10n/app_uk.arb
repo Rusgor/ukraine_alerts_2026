@@ -8,5 +8,14 @@
   "refresh": "Оновити",
   "errorLoading": "Помилка завантаження",
   "retry": "Спробувати знову",
-  "myRegion": "Моя область"
+  "myRegion": "Моя область",
+  "alertTypeAirRaid": "Повітряна тривога",
+  "alertTypeArtillery": "Загроза артилерійського обстрілу",
+  "alertTypeUrbanFights": "Вуличні бої",
+  "alertTypeChemical": "Хімічна загроза",
+  "alertTypeNuclear": "Ядерна загроза",
+  "alertTypeUnknown": "Загроза",
+  "alertShelter": "Будь ласка, пройдіть до укриття",
+  "alertChemicalShelter": "Герметизуйте приміщення!",
+  "alertNuclearShelter": "Негайно до укриття!"
 }

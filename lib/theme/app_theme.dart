@@ -2,31 +2,35 @@ import 'package:flutter/material.dart';
 
 abstract class AppColors {
   // Home screen gradient
-  static const homeGradientTop = Color(0xFF87CEEB);
-  static const homeGradientBottom = Color(0xFFE8F5A0);
+  static const homeGradientTop = Color(0xFF1DC0F4);
+  static const homeGradientBottom = Color(0xFFF2F67C);
 
   // Alerts Map
   static const mapBackground = Color(0xFFD6EEFF);
 
   // Region Alerts - initial
-  static const regionInitialBackground = Color(0xFFD6EEFF);
-  static const regionAppBar = Color(0xFF90CAF9);
+  static const regionInitialTop = Color(0xFF7EC8F2);
+  static const regionInitialBottom = Color(0xFFAADBF7);
+  static const regionInitialBackground = Color(0xFF7EC8F2);
 
   // Region Alerts - no alert (green)
-  static const noAlertGradientTop = Color(0xFF388E3C);
-  static const noAlertGradientBottom = Color(0xFF76FF03);
+  static const noAlertGradientTop = Color(0xFF01A558);
+  static const noAlertGradientBottom = Color(0xFF7AFC68);
   static const noAlertAppBar = Color(0xFF2E7D32);
 
   // Region Alerts - alert active (red)
-  static const alertGradientTop = Color(0xFF6D1B1B);
-  static const alertGradientBottom = Color(0xFFF44336);
+  static const alertGradientTop = Color(0xFFA30000);
+  static const alertGradientBottom = Color(0xFFFF2E2E);
   static const alertAppBar = Color(0xFF8B2525);
 
   // General
-  static const textDark = Color(0xFF1A237E);
+  static const textDark = Color(0xFF1E1E1E);
   static const textWhite = Colors.white;
   static const surface = Colors.white;
   static const error = Color(0xFFD32F2F);
+  static const cityOverlay = Color(0xFF5AAAD4);
+  static const dropdownShadow = Color(0x40000000);
+  static const barrierColor = Colors.black38;
 }
 
 abstract class AppSizes {

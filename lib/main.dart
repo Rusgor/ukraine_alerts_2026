@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:ua_air_alerts/l10n/app_localizations.dart';
+import 'package:ua_air_alerts/router/app_router.dart';
 import 'package:ua_air_alerts/theme/app_theme.dart';
 
 void main() async {
@@ -15,7 +16,7 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return MaterialApp.router(
       title: 'UA Air Alerts',
       theme: buildAppTheme(),
       locale: const Locale('uk'),
@@ -26,9 +27,7 @@ class MyApp extends StatelessWidget {
         GlobalWidgetsLocalizations.delegate,
         GlobalCupertinoLocalizations.delegate,
       ],
-      home: const Scaffold(
-        body: Center(child: Text('UA Air Alerts')),
-      ),
+      routerConfig: appRouter,
     );
   }
 }

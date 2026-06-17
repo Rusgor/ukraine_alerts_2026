@@ -151,6 +151,60 @@ abstract class AppLocalizations {
   /// In uk, this message translates to:
   /// **'Моя область'**
   String get myRegion;
+
+  /// No description provided for @alertTypeAirRaid.
+  ///
+  /// In uk, this message translates to:
+  /// **'Повітряна тривога'**
+  String get alertTypeAirRaid;
+
+  /// No description provided for @alertTypeArtillery.
+  ///
+  /// In uk, this message translates to:
+  /// **'Загроза артилерійського обстрілу'**
+  String get alertTypeArtillery;
+
+  /// No description provided for @alertTypeUrbanFights.
+  ///
+  /// In uk, this message translates to:
+  /// **'Вуличні бої'**
+  String get alertTypeUrbanFights;
+
+  /// No description provided for @alertTypeChemical.
+  ///
+  /// In uk, this message translates to:
+  /// **'Хімічна загроза'**
+  String get alertTypeChemical;
+
+  /// No description provided for @alertTypeNuclear.
+  ///
+  /// In uk, this message translates to:
+  /// **'Ядерна загроза'**
+  String get alertTypeNuclear;
+
+  /// No description provided for @alertTypeUnknown.
+  ///
+  /// In uk, this message translates to:
+  /// **'Загроза'**
+  String get alertTypeUnknown;
+
+  /// No description provided for @alertShelter.
+  ///
+  /// In uk, this message translates to:
+  /// **'Будь ласка, пройдіть до укриття'**
+  String get alertShelter;
+
+  /// No description provided for @alertChemicalShelter.
+  ///
+  /// In uk, this message translates to:
+  /// **'Герметизуйте приміщення!'**
+  String get alertChemicalShelter;
+
+  /// No description provided for @alertNuclearShelter.
+  ///
+  /// In uk, this message translates to:
+  /// **'Негайно до укриття!'**
+  String get alertNuclearShelter;
 }
 
 class _AppLocalizationsDelegate

@@ -15,5 +15,5 @@ class AlertEntity {
   final String locationUid;
   final String alertType;
   final DateTime startedAt;
-  final String? locationOblastUid;
+  final int? locationOblastUid;
 }

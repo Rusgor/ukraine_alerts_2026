@@ -34,4 +34,31 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get myRegion => 'My region';
+
+  @override
+  String get alertTypeAirRaid => 'Air raid alert';
+
+  @override
+  String get alertTypeArtillery => 'Artillery shelling threat';
+
+  @override
+  String get alertTypeUrbanFights => 'Urban fights';
+
+  @override
+  String get alertTypeChemical => 'Chemical threat';
+
+  @override
+  String get alertTypeNuclear => 'Nuclear threat';
+
+  @override
+  String get alertTypeUnknown => 'Threat';
+
+  @override
+  String get alertShelter => 'Please proceed to shelter';
+
+  @override
+  String get alertChemicalShelter => 'Seal the premises!';
+
+  @override
+  String get alertNuclearShelter => 'Immediately to shelter!';
 }
