@@ -9,7 +9,7 @@ import 'package:ua_air_alerts/features/alerts/data/repository/api_error.dart';
 
 class AlertsRepository {
   AlertsRepository({CacheManager? cacheManager})
-      : _cache = cacheManager ?? DefaultCacheManager();
+    : _cache = cacheManager ?? DefaultCacheManager();
 
   static const _baseUrl = 'https://api.alerts.in.ua';
 
@@ -40,11 +40,7 @@ class AlertsRepository {
 
   Future<Map<String, dynamic>> _fetchJson(String path) async {
     final url = '$_baseUrl$path';
-    final file = await _cache.getSingleFile(
-      url,
-      headers: _headers,
-      key: path,
-    );
+    final file = await _cache.getSingleFile(url, headers: _headers, key: path);
     final body = await file.readAsString();
     final decoded = jsonDecode(body);
     if (decoded is Map<String, dynamic>) {
@@ -56,7 +52,5 @@ class AlertsRepository {
     throw ApiError('Unexpected response format');
   }
 
-  Map<String, String> get _headers => {
-        'Authorization': 'Bearer $_token',
-      };
+  Map<String, String> get _headers => {'Authorization': 'Bearer $_token'};
 }
