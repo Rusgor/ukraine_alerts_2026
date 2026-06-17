@@ -1,0 +1,12 @@
+{
+  "@@locale": "en",
+  "alertsMap": "Alerts Map",
+  "regionAlerts": "Region Alerts",
+  "selectRegion": "Select city or region",
+  "noAlert": "No alert",
+  "alertActive": "Air raid alert!\nPlease proceed to shelter",
+  "refresh": "Refresh",
+  "errorLoading": "Loading error",
+  "retry": "Try again",
+  "myRegion": "My region"
+}
