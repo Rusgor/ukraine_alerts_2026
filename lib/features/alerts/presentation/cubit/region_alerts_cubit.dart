@@ -2,9 +2,11 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:ua_air_alerts/features/alerts/data/constants.dart';
 import 'package:ua_air_alerts/features/alerts/data/entity/oblast_assets.dart';
 import 'package:ua_air_alerts/features/alerts/data/repository/alerts_repository.dart';
 import 'package:ua_air_alerts/features/alerts/data/repository/api_error.dart';
+import 'package:ua_air_alerts/features/alerts/data/service/background_alert_service.dart';
 import 'package:ua_air_alerts/features/alerts/presentation/cubit/region_alerts_state.dart';
 
 class RegionAlertsCubit extends Cubit<RegionAlertsState> {
@@ -12,16 +14,27 @@ class RegionAlertsCubit extends Cubit<RegionAlertsState> {
 
   final AlertsRepository _repository;
 
-  static const _savedRegionKey = 'saved_region_uid';
-  static const _myRegionKey = 'my_region_uid';
-
   String? _currentUid;
+  String? _myRegionUid;
+  DateTime? _lastRefresh;
 
   String? get currentUid => _currentUid;
 
+  bool get isMyRegion => _currentUid != null && _currentUid == _myRegionUid;
+
+  bool get canRefresh {
+    if (_lastRefresh == null) return true;
+    return DateTime.now().difference(_lastRefresh!) >
+        const Duration(seconds: 30);
+  }
+
   Future<void> init() async {
     final prefs = await SharedPreferences.getInstance();
-    final savedUid = prefs.getString(_savedRegionKey);
+    _myRegionUid = prefs.getString(StorageKeys.myRegionUid);
+    if (_myRegionUid != null) {
+      startBackgroundMonitoring();
+    }
+    final savedUid = prefs.getString(StorageKeys.savedRegionUid);
     if (savedUid != null) {
       _currentUid = savedUid;
       await checkAlert(savedUid);
@@ -30,7 +43,7 @@ class RegionAlertsCubit extends Cubit<RegionAlertsState> {
     }
   }
 
-  Future<void> checkAlert(String uid) async {
+  Future<void> checkAlert(String uid, {bool forceRefresh = false}) async {
     final bool? prevAlert = state is RegionAlertsLoaded
         ? (state as RegionAlertsLoaded).isAlert
         : null;
@@ -40,14 +53,17 @@ class RegionAlertsCubit extends Cubit<RegionAlertsState> {
     await _saveSelectedRegion(uid);
 
     try {
-      final status = await _repository.getRegionAlertStatus(uid);
+      final status = await _repository.getRegionAlertStatus(
+        uid,
+        forceRefresh: forceRefresh,
+      );
+
       if (status.contains('A')) {
-        final alerts = await _repository.getActiveAlerts();
+        final alerts = await _repository.getActiveAlerts(
+          forceRefresh: forceRefresh,
+        );
         final match = alerts.where((a) => a.locationUid == uid).firstOrNull;
-        emit(RegionAlertsLoaded(
-          isAlert: true,
-          alertType: match?.alertType,
-        ));
+        emit(RegionAlertsLoaded(isAlert: true, alertType: match?.alertType));
       } else {
         emit(RegionAlertsLoaded(isAlert: false));
       }
@@ -59,8 +75,9 @@ class RegionAlertsCubit extends Cubit<RegionAlertsState> {
   }
 
   Future<void> refresh() async {
-    if (_currentUid != null) {
-      await checkAlert(_currentUid!);
+    if (_currentUid != null && canRefresh) {
+      _lastRefresh = DateTime.now();
+      await checkAlert(_currentUid!, forceRefresh: true);
     }
   }
 
@@ -69,19 +86,33 @@ class RegionAlertsCubit extends Cubit<RegionAlertsState> {
     emit(RegionAlertsInitial());
   }
 
-  Future<void> setMyRegion(String uid) async {
+  Future<void> toggleMyRegion() async {
+    if (_currentUid == null) return;
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setString(_myRegionKey, uid);
-  }
-
-  Future<String?> getMyRegion() async {
-    final prefs = await SharedPreferences.getInstance();
-    return prefs.getString(_myRegionKey);
+    if (isMyRegion) {
+      _myRegionUid = null;
+      await prefs.remove(StorageKeys.myRegionUid);
+      stopBackgroundMonitoring();
+    } else {
+      _myRegionUid = _currentUid;
+      await prefs.setString(StorageKeys.myRegionUid, _currentUid!);
+      startBackgroundMonitoring();
+    }
+    // Re-emit current state to trigger UI rebuild
+    final current = state;
+    if (current is RegionAlertsLoaded) {
+      emit(
+        RegionAlertsLoaded(
+          isAlert: current.isAlert,
+          alertType: current.alertType,
+        ),
+      );
+    }
   }
 
   Future<void> _saveSelectedRegion(String uid) async {
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setString(_savedRegionKey, uid);
+    await prefs.setString(StorageKeys.savedRegionUid, uid);
   }
 
   Future<void> _tryAutoDetectRegion() async {

@@ -9,6 +9,8 @@
   "errorLoading": "Loading error",
   "retry": "Try again",
   "myRegion": "My region",
+  "myRegionSaved": "Tracking this region",
+  "myRegionRemoved": "No longer tracking",
   "alertTypeAirRaid": "Air raid alert",
   "alertTypeArtillery": "Artillery shelling threat",
   "alertTypeUrbanFights": "Urban fights",
@@ -17,5 +19,6 @@
   "alertTypeUnknown": "Threat",
   "alertShelter": "Please proceed to shelter",
   "alertChemicalShelter": "Seal the premises!",
-  "alertNuclearShelter": "Immediately to shelter!"
+  "alertNuclearShelter": "Immediately to shelter!",
+  "starTooltip": "Tap ★ to track alerts in this region even when the app is minimized"
 }

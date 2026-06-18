@@ -31,7 +31,7 @@ class _AlertsMapView extends StatelessWidget {
       backgroundColor: AppColors.mapBackground,
       appBar: AlertsAppBar(
         title: l10n.alertsMap,
-        onRefresh: () => context.read<AlertsMapCubit>().loadAlerts(),
+        onRefresh: () => context.read<AlertsMapCubit>().refresh(),
       ),
       body: BlocBuilder<AlertsMapCubit, AlertsMapState>(
         builder: (context, state) => switch (state) {

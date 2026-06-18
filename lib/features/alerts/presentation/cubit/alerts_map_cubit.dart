@@ -7,11 +7,19 @@ class AlertsMapCubit extends Cubit<AlertsMapState> {
   AlertsMapCubit(this._repository) : super(AlertsMapLoading());
 
   final AlertsRepository _repository;
+  DateTime? _lastRefresh;
 
-  Future<void> loadAlerts() async {
+  bool get canRefresh {
+    if (_lastRefresh == null) return true;
+    return DateTime.now().difference(_lastRefresh!) >
+        const Duration(seconds: 30);
+  }
+
+  Future<void> loadAlerts({bool forceRefresh = false}) async {
     emit(AlertsMapLoading());
     try {
-      final alerts = await _repository.getActiveAlerts();
+      final alerts =
+          await _repository.getActiveAlerts(forceRefresh: forceRefresh);
       final oblastAlerts =
           alerts.where((a) => a.locationType == 'oblast').toList();
       emit(AlertsMapLoaded(oblastAlerts));
@@ -19,6 +27,13 @@ class AlertsMapCubit extends Cubit<AlertsMapState> {
       emit(AlertsMapError(e.message));
     } on Exception catch (e) {
       emit(AlertsMapError(e.toString()));
+    }
+  }
+
+  Future<void> refresh() async {
+    if (canRefresh) {
+      _lastRefresh = DateTime.now();
+      await loadAlerts(forceRefresh: true);
     }
   }
 }

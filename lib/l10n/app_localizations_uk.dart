@@ -37,6 +37,12 @@ class AppLocalizationsUk extends AppLocalizations {
   String get myRegion => 'Моя область';
 
   @override
+  String get myRegionSaved => 'Слідкую за цією областю';
+
+  @override
+  String get myRegionRemoved => 'Більше не слідкую';
+
+  @override
   String get alertTypeAirRaid => 'Повітряна тривога';
 
   @override
@@ -62,4 +68,8 @@ class AppLocalizationsUk extends AppLocalizations {
 
   @override
   String get alertNuclearShelter => 'Негайно до укриття!';
+
+  @override
+  String get starTooltip =>
+      'Натисніть ★ щоб слідкувати за тривогами у цьому регіоні навіть коли додаток згорнутий';
 }

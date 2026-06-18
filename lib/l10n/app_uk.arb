@@ -9,6 +9,8 @@
   "errorLoading": "Помилка завантаження",
   "retry": "Спробувати знову",
   "myRegion": "Моя область",
+  "myRegionSaved": "Слідкую за цією областю",
+  "myRegionRemoved": "Більше не слідкую",
   "alertTypeAirRaid": "Повітряна тривога",
   "alertTypeArtillery": "Загроза артилерійського обстрілу",
   "alertTypeUrbanFights": "Вуличні бої",
@@ -17,5 +19,6 @@
   "alertTypeUnknown": "Загроза",
   "alertShelter": "Будь ласка, пройдіть до укриття",
   "alertChemicalShelter": "Герметизуйте приміщення!",
-  "alertNuclearShelter": "Негайно до укриття!"
+  "alertNuclearShelter": "Негайно до укриття!",
+  "starTooltip": "Натисніть ★ щоб слідкувати за тривогами у цьому регіоні навіть коли додаток згорнутий"
 }

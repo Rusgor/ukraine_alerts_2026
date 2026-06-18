@@ -121,11 +121,11 @@ class _AlertTile extends StatelessWidget {
       };
 
   static Color _alertColor(String type) => switch (type) {
-        'air_raid' => Colors.deepOrange,
-        'artillery_shelling' => Colors.orange,
-        'urban_fights' => Colors.red,
-        'chemical' => Colors.green.shade700,
-        'nuclear' => Colors.purple,
-        _ => Colors.deepOrange,
+        'air_raid' => AppColors.alertTypeAirRaid,
+        'artillery_shelling' => AppColors.alertTypeArtillery,
+        'urban_fights' => AppColors.alertTypeUrbanFights,
+        'chemical' => AppColors.alertTypeChemical,
+        'nuclear' => AppColors.alertTypeNuclear,
+        _ => AppColors.alertTypeAirRaid,
       };
 }

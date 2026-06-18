@@ -36,6 +36,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get myRegion => 'My region';
 
   @override
+  String get myRegionSaved => 'Tracking this region';
+
+  @override
+  String get myRegionRemoved => 'No longer tracking';
+
+  @override
   String get alertTypeAirRaid => 'Air raid alert';
 
   @override
@@ -61,4 +67,8 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get alertNuclearShelter => 'Immediately to shelter!';
+
+  @override
+  String get starTooltip =>
+      'Tap ★ to track alerts in this region even when the app is minimized';
 }

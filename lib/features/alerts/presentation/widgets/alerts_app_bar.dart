@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:ua_air_alerts/features/alerts/presentation/widgets/refresh_button.dart';
 import 'package:ua_air_alerts/theme/app_theme.dart';
 
 class AlertsAppBar extends StatelessWidget implements PreferredSizeWidget {
@@ -8,12 +9,14 @@ class AlertsAppBar extends StatelessWidget implements PreferredSizeWidget {
     this.onRefresh,
     this.backgroundColor,
     this.foregroundColor,
+    this.extraActions = const [],
   });
 
   final String title;
   final VoidCallback? onRefresh;
   final Color? backgroundColor;
   final Color? foregroundColor;
+  final List<Widget> extraActions;
 
   @override
   Size get preferredSize => const Size.fromHeight(kToolbarHeight);
@@ -26,8 +29,8 @@ class AlertsAppBar extends StatelessWidget implements PreferredSizeWidget {
       backgroundColor: backgroundColor ?? Colors.transparent,
       foregroundColor: fgColor,
       title: Text(
-        textAlign: TextAlign.center,
         title,
+        textAlign: TextAlign.center,
         style: TextStyle(
           fontWeight: FontWeight.bold,
           fontSize: AppSizes.fontXL,
@@ -35,11 +38,9 @@ class AlertsAppBar extends StatelessWidget implements PreferredSizeWidget {
         ),
       ),
       actions: [
+        ...extraActions,
         if (onRefresh != null)
-          IconButton(
-            onPressed: onRefresh,
-            icon: Icon(Icons.refresh, color: fgColor),
-          ),
+          RefreshButton(onRefresh: onRefresh!, color: fgColor),
       ],
     );
   }

@@ -26,12 +26,12 @@ class _InitialBody extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 100),
+      padding: const EdgeInsets.only(bottom: AppSizes.cityBottomOffset),
       child: Center(
         child: Image.asset(
           'assets/image_city.png',
-          width: 250,
-          height: 250,
+          width: AppSizes.cityImageSize,
+          height: AppSizes.cityImageSize,
           color: AppColors.cityOverlay,
           colorBlendMode: BlendMode.srcIn,
         ),
@@ -51,15 +51,15 @@ class _LoadedBody extends StatelessWidget {
     final l10n = AppLocalizations.of(context)!;
 
     return Padding(
-      padding: const EdgeInsets.only(bottom: 80),
+      padding: const EdgeInsets.only(bottom: AppSizes.bottomOffset),
       child: Center(
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             Image.asset(
               isAlert ? 'assets/image_alarm.png' : 'assets/image_done.png',
-              width: 120,
-              height: 120,
+              width: AppSizes.statusImageSize,
+              height: AppSizes.statusImageSize,
             ),
             const SizedBox(height: AppSizes.paddingXL),
             Text(
@@ -117,7 +117,7 @@ class _ErrorBody extends StatelessWidget {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          const Icon(Icons.error_outline, size: 64, color: Colors.white70),
+          const Icon(Icons.error_outline, size: 64, color: AppColors.textMuted),
           const SizedBox(height: AppSizes.paddingL),
           Text(
             l10n.errorLoading,
@@ -130,7 +130,7 @@ class _ErrorBody extends StatelessWidget {
           Text(
             message,
             textAlign: TextAlign.center,
-            style: const TextStyle(color: Colors.white70),
+            style: const TextStyle(color: AppColors.textMuted),
           ),
         ],
       ),

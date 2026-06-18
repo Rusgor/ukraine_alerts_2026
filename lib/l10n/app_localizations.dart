@@ -152,6 +152,18 @@ abstract class AppLocalizations {
   /// **'Моя область'**
   String get myRegion;
 
+  /// No description provided for @myRegionSaved.
+  ///
+  /// In uk, this message translates to:
+  /// **'Слідкую за цією областю'**
+  String get myRegionSaved;
+
+  /// No description provided for @myRegionRemoved.
+  ///
+  /// In uk, this message translates to:
+  /// **'Більше не слідкую'**
+  String get myRegionRemoved;
+
   /// No description provided for @alertTypeAirRaid.
   ///
   /// In uk, this message translates to:
@@ -205,6 +217,12 @@ abstract class AppLocalizations {
   /// In uk, this message translates to:
   /// **'Негайно до укриття!'**
   String get alertNuclearShelter;
+
+  /// No description provided for @starTooltip.
+  ///
+  /// In uk, this message translates to:
+  /// **'Натисніть ★ щоб слідкувати за тривогами у цьому регіоні навіть коли додаток згорнутий'**
+  String get starTooltip;
 }
 
 class _AppLocalizationsDelegate

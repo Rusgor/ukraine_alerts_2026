@@ -1,5 +1,5 @@
 name: ua_air_alerts
-description: "UA Air Alerts — курсова робота"
+description: "Real-time air raid alerts map and region monitoring for Ukraine. Stay informed and safe."
 publish_to: 'none'
 version: 1.0.0+1
 
@@ -22,7 +22,7 @@ dependencies:
   geolocator: ^13.0.2
   geocoding: ^3.0.0
   shared_preferences: ^2.3.4
-  workmanager: ^0.5.2
+  workmanager: ^0.6.0
   flutter_local_notifications: ^18.0.1
   audioplayers: ^6.1.0
   intl: ^0.20.2
@@ -33,6 +33,13 @@ dev_dependencies:
   flutter_lints: ^6.0.0
   json_serializable: ^6.9.5
   build_runner: ^2.4.15
+  flutter_launcher_icons: ^0.14.3
+
+flutter_launcher_icons:
+  android: true
+  ios: true
+  image_path: "assets/icon.png"
+  remove_alpha_ios: true
 
 flutter:
   uses-material-design: true
@@ -41,5 +48,6 @@ flutter:
   assets:
     - .env
     - assets/
+    - assets/sounds/
     - assets/map/
     - assets/map/oblasts/

@@ -4,8 +4,10 @@ import 'package:ua_air_alerts/features/alerts/data/repository/alerts_repository.
 import 'package:ua_air_alerts/features/alerts/presentation/cubit/region_alerts_cubit.dart';
 import 'package:ua_air_alerts/features/alerts/presentation/cubit/region_alerts_state.dart';
 import 'package:ua_air_alerts/features/alerts/presentation/widgets/alerts_app_bar.dart';
+import 'package:ua_air_alerts/features/alerts/presentation/widgets/pulse_icon_button.dart';
 import 'package:ua_air_alerts/features/alerts/presentation/widgets/region_dropdown.dart';
 import 'package:ua_air_alerts/features/alerts/presentation/widgets/region_status_body.dart';
+import 'package:ua_air_alerts/features/alerts/presentation/widgets/star_tooltip_overlay.dart';
 import 'package:ua_air_alerts/l10n/app_localizations.dart';
 import 'package:ua_air_alerts/theme/app_theme.dart';
 
@@ -32,11 +34,13 @@ class _RegionAlertsView extends StatelessWidget {
       builder: (context, state) {
         final colors = _getColors(state);
 
-        return AnimatedContainer(
-          duration: const Duration(milliseconds: 600),
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topCenter,
+        return StarTooltipOverlay(
+          enabled: state is! RegionAlertsInitial,
+          child: AnimatedContainer(
+            duration: const Duration(milliseconds: 600),
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topCenter,
               end: Alignment.bottomCenter,
               colors: colors,
             ),
@@ -55,6 +59,49 @@ class _RegionAlertsView extends StatelessWidget {
                       : () => context.read<RegionAlertsCubit>().refresh(),
                   backgroundColor: Colors.transparent,
                   foregroundColor: _getForegroundColor(state),
+                  extraActions: [
+                    if (state is! RegionAlertsInitial)
+                      PulseIconButton(
+                        icon: context.read<RegionAlertsCubit>().isMyRegion
+                            ? Icons.star
+                            : Icons.star_border,
+                        color: _getForegroundColor(state),
+                        onPressed: () {
+                          final cubit = context.read<RegionAlertsCubit>();
+                          final wasMyRegion = cubit.isMyRegion;
+                          cubit.toggleMyRegion();
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Icon(
+                                    wasMyRegion
+                                        ? Icons.star_border
+                                        : Icons.star,
+                                    color: Colors.white,
+                                  ),
+                                  const SizedBox(width: AppSizes.paddingS),
+                                  Text(
+                                    wasMyRegion
+                                        ? l10n.myRegionRemoved
+                                        : l10n.myRegionSaved,
+                                  ),
+                                ],
+                              ),
+                              backgroundColor: AppColors.snackBarBackground,
+                              behavior: SnackBarBehavior.floating,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(
+                                  AppSizes.radiusM,
+                                ),
+                              ),
+                              duration: const Duration(seconds: 2),
+                            ),
+                          );
+                        },
+                      ),
+                  ],
                 ),
               ),
             ),
@@ -78,6 +125,7 @@ class _RegionAlertsView extends StatelessWidget {
               ],
             ),
           ),
+        ),
         );
       },
     );
