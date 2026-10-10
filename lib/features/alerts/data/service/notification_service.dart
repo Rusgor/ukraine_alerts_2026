@@ -9,9 +9,9 @@ class NotificationService {
       await _plugin.initialize(
         const InitializationSettings(
           iOS: DarwinInitializationSettings(
-            requestAlertPermission: true,
-            requestSoundPermission: true,
-            requestBadgePermission: true,
+            requestAlertPermission: false,
+            requestSoundPermission: false,
+            requestBadgePermission: false,
           ),
           android: AndroidInitializationSettings('@mipmap/ic_launcher'),
         ),

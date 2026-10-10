@@ -1,12 +1,12 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:ua_air_alerts/features/alerts/data/repository/alerts_repository.dart';
+import 'package:ua_air_alerts/features/alerts/domain/alerts_gateway.dart';
 import 'package:ua_air_alerts/features/alerts/data/repository/api_error.dart';
 import 'package:ua_air_alerts/features/alerts/presentation/cubit/alerts_map_state.dart';
 
 class AlertsMapCubit extends Cubit<AlertsMapState> {
   AlertsMapCubit(this._repository) : super(AlertsMapLoading());
 
-  final AlertsRepository _repository;
+  final AlertsGateway _repository;
   DateTime? _lastRefresh;
 
   bool get canRefresh {
@@ -18,15 +18,17 @@ class AlertsMapCubit extends Cubit<AlertsMapState> {
   Future<void> loadAlerts({bool forceRefresh = false}) async {
     emit(AlertsMapLoading());
     try {
-      final alerts =
-          await _repository.getActiveAlerts(forceRefresh: forceRefresh);
-      final oblastAlerts =
-          alerts.where((a) => a.locationType == 'oblast').toList();
+      final alerts = await _repository.getActiveAlerts(
+        forceRefresh: forceRefresh,
+      );
+      final oblastAlerts = alerts
+          .where((a) => a.locationType == 'oblast')
+          .toList();
       emit(AlertsMapLoaded(oblastAlerts));
-    } on ApiError catch (e) {
-      emit(AlertsMapError(e.message));
-    } on Exception catch (e) {
-      emit(AlertsMapError(e.toString()));
+    } on ApiError {
+      emit(AlertsMapError(''));
+    } on Exception {
+      emit(AlertsMapError(''));
     }
   }
 

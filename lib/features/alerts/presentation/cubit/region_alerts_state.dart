@@ -1,22 +1,56 @@
-sealed class RegionAlertsState {}
+sealed class RegionAlertsState {
+  const RegionAlertsState({
+    this.selectedUid,
+    this.myRegionUid,
+    this.monitoringEnabled = false,
+  });
 
-final class RegionAlertsInitial implements RegionAlertsState {}
+  final String? selectedUid;
+  final String? myRegionUid;
+  final bool monitoringEnabled;
 
-final class RegionAlertsLoading implements RegionAlertsState {
-  RegionAlertsLoading({this.previousAlert});
+  bool get isMyRegion => selectedUid != null && selectedUid == myRegionUid;
+}
+
+final class RegionAlertsInitial extends RegionAlertsState {
+  const RegionAlertsInitial({
+    super.selectedUid,
+    super.myRegionUid,
+    super.monitoringEnabled,
+  });
+}
+
+final class RegionAlertsLoading extends RegionAlertsState {
+  const RegionAlertsLoading({
+    this.previousAlert,
+    super.selectedUid,
+    super.myRegionUid,
+    super.monitoringEnabled,
+  });
 
   final bool? previousAlert;
 }
 
-final class RegionAlertsLoaded implements RegionAlertsState {
-  RegionAlertsLoaded({required this.isAlert, this.alertType});
+final class RegionAlertsLoaded extends RegionAlertsState {
+  const RegionAlertsLoaded({
+    required this.isAlert,
+    this.alertType,
+    super.selectedUid,
+    super.myRegionUid,
+    super.monitoringEnabled,
+  });
 
   final bool isAlert;
   final String? alertType;
 }
 
-final class RegionAlertsError implements RegionAlertsState {
-  RegionAlertsError(this.message);
+final class RegionAlertsError extends RegionAlertsState {
+  const RegionAlertsError(
+    this.message, {
+    super.selectedUid,
+    super.myRegionUid,
+    super.monitoringEnabled,
+  });
 
   final String message;
 }

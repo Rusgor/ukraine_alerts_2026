@@ -1,26 +1,25 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:geocoding/geocoding.dart';
-import 'package:geolocator/geolocator.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:ua_air_alerts/core/settings/app_settings.dart';
 import 'package:ua_air_alerts/features/alerts/data/constants.dart';
-import 'package:ua_air_alerts/features/alerts/data/entity/oblast_assets.dart';
-import 'package:ua_air_alerts/features/alerts/data/repository/alerts_repository.dart';
+import 'package:ua_air_alerts/features/alerts/domain/alerts_gateway.dart';
 import 'package:ua_air_alerts/features/alerts/data/repository/api_error.dart';
 import 'package:ua_air_alerts/features/alerts/data/service/background_alert_service.dart';
+import 'package:ua_air_alerts/features/alerts/data/service/region_location_service.dart';
+import 'package:ua_air_alerts/features/alerts/domain/alert_status.dart';
 import 'package:ua_air_alerts/features/alerts/presentation/cubit/region_alerts_state.dart';
 
 class RegionAlertsCubit extends Cubit<RegionAlertsState> {
-  RegionAlertsCubit(this._repository) : super(RegionAlertsInitial());
+  RegionAlertsCubit(this._repository, this._settings, this._locationService)
+    : super(const RegionAlertsInitial());
 
-  final AlertsRepository _repository;
-
-  String? _currentUid;
-  String? _myRegionUid;
+  final AlertsGateway _repository;
+  final AppSettings _settings;
+  final RegionLocationService _locationService;
   DateTime? _lastRefresh;
 
-  String? get currentUid => _currentUid;
+  String? get currentUid => state.selectedUid;
 
-  bool get isMyRegion => _currentUid != null && _currentUid == _myRegionUid;
+  bool get isMyRegion => state.isMyRegion;
 
   bool get canRefresh {
     if (_lastRefresh == null) return true;
@@ -29,174 +28,211 @@ class RegionAlertsCubit extends Cubit<RegionAlertsState> {
   }
 
   Future<void> init() async {
-    final prefs = await SharedPreferences.getInstance();
-    _myRegionUid = prefs.getString(StorageKeys.myRegionUid);
-    if (_myRegionUid != null) {
-      startBackgroundMonitoring();
-    }
-    final savedUid = prefs.getString(StorageKeys.savedRegionUid);
-    if (savedUid != null) {
-      _currentUid = savedUid;
-      await checkAlert(savedUid);
-    } else {
-      await _tryAutoDetectRegion();
-    }
+    final myRegionUid = await _settings.getString(StorageKeys.myRegionUid);
+    final selectedUid = await _settings.getString(StorageKeys.savedRegionUid);
+    final monitoringEnabled = myRegionUid != null
+        ? await startBackgroundMonitoring(requestPermission: false)
+        : false;
+
+    emit(
+      RegionAlertsInitial(
+        selectedUid: selectedUid,
+        myRegionUid: myRegionUid,
+        monitoringEnabled: monitoringEnabled,
+      ),
+    );
+    if (selectedUid != null) await checkAlert(selectedUid);
   }
 
   Future<void> checkAlert(String uid, {bool forceRefresh = false}) async {
-    final bool? prevAlert = state is RegionAlertsLoaded
-        ? (state as RegionAlertsLoaded).isAlert
-        : null;
+    final currentState = state;
+    final previousAlert = switch (currentState) {
+      RegionAlertsLoaded(:final isAlert) => isAlert,
+      RegionAlertsLoading(:final previousAlert) => previousAlert,
+      _ => null,
+    };
+    final monitoringEnabled = currentState.monitoringEnabled;
+    final myRegionUid = currentState.myRegionUid;
 
-    emit(RegionAlertsLoading(previousAlert: prevAlert));
-    _currentUid = uid;
-    await _saveSelectedRegion(uid);
+    emit(
+      RegionAlertsLoading(
+        previousAlert: previousAlert,
+        selectedUid: uid,
+        myRegionUid: myRegionUid,
+        monitoringEnabled: monitoringEnabled,
+      ),
+    );
 
     try {
+      await _settings.setString(StorageKeys.savedRegionUid, uid);
       final status = await _repository.getRegionAlertStatus(
         uid,
         forceRefresh: forceRefresh,
       );
 
-      if (status.contains('A')) {
+      final alertStatus = AlertStatus.parse(status);
+      if (alertStatus == AlertStatus.unknown) {
+        throw ApiError('Unable to determine the alert status');
+      }
+
+      if (alertStatus.hasAlert) {
         final alerts = await _repository.getActiveAlerts(
           forceRefresh: forceRefresh,
         );
-        final match = alerts.where((a) => a.locationUid == uid).firstOrNull;
-        emit(RegionAlertsLoaded(isAlert: true, alertType: match?.alertType));
+        final match = alerts
+            .where((alert) => alert.locationUid == uid)
+            .firstOrNull;
+        emit(
+          RegionAlertsLoaded(
+            isAlert: true,
+            alertType: match?.alertType,
+            selectedUid: uid,
+            myRegionUid: myRegionUid,
+            monitoringEnabled: monitoringEnabled,
+          ),
+        );
       } else {
-        emit(RegionAlertsLoaded(isAlert: false));
+        emit(
+          RegionAlertsLoaded(
+            isAlert: false,
+            selectedUid: uid,
+            myRegionUid: myRegionUid,
+            monitoringEnabled: monitoringEnabled,
+          ),
+        );
       }
-    } on ApiError catch (e) {
-      emit(RegionAlertsError(e.message));
-    } on Exception catch (e) {
-      emit(RegionAlertsError(e.toString()));
+    } on ApiError {
+      emit(
+        RegionAlertsError(
+          '',
+          selectedUid: uid,
+          myRegionUid: myRegionUid,
+          monitoringEnabled: monitoringEnabled,
+        ),
+      );
+    } on Exception {
+      emit(
+        RegionAlertsError(
+          '',
+          selectedUid: uid,
+          myRegionUid: myRegionUid,
+          monitoringEnabled: monitoringEnabled,
+        ),
+      );
     }
   }
 
   Future<void> refresh() async {
-    if (_currentUid != null && canRefresh) {
+    final uid = state.selectedUid;
+    if (uid != null && canRefresh) {
       _lastRefresh = DateTime.now();
-      await checkAlert(_currentUid!, forceRefresh: true);
+      await checkAlert(uid, forceRefresh: true);
     }
   }
 
   void clearSelection() {
-    _currentUid = null;
-    emit(RegionAlertsInitial());
+    final currentState = state;
+    emit(
+      RegionAlertsInitial(
+        myRegionUid: currentState.myRegionUid,
+        monitoringEnabled: currentState.monitoringEnabled,
+      ),
+    );
   }
 
-  Future<void> toggleMyRegion() async {
-    if (_currentUid == null) return;
-    final prefs = await SharedPreferences.getInstance();
-    if (isMyRegion) {
-      _myRegionUid = null;
-      await prefs.remove(StorageKeys.myRegionUid);
-      stopBackgroundMonitoring();
-    } else {
-      _myRegionUid = _currentUid;
-      await prefs.setString(StorageKeys.myRegionUid, _currentUid!);
-      startBackgroundMonitoring();
-    }
-    // Re-emit current state to trigger UI rebuild
-    final current = state;
-    if (current is RegionAlertsLoaded) {
-      emit(
-        RegionAlertsLoaded(
-          isAlert: current.isAlert,
-          alertType: current.alertType,
-        ),
-      );
-    }
-  }
+  Future<bool> toggleMyRegion() async {
+    final uid = state.selectedUid;
+    if (uid == null) return false;
 
-  Future<void> _saveSelectedRegion(String uid) async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setString(StorageKeys.savedRegionUid, uid);
-  }
-
-  Future<void> _tryAutoDetectRegion() async {
     try {
-      final permission = await Geolocator.checkPermission();
-
-      if (permission == LocationPermission.denied) {
-        final requested = await Geolocator.requestPermission();
-
-        if (requested == LocationPermission.denied ||
-            requested == LocationPermission.deniedForever) {
-          return;
-        }
+      if (state.isMyRegion) {
+        if (!await stopBackgroundMonitoring()) return false;
+        await _settings.remove(StorageKeys.myRegionUid);
+        _emitWithMonitoring(myRegionUid: null, monitoringEnabled: false);
+        return true;
       }
 
-      if (permission == LocationPermission.deniedForever) {
+      await _settings.setString(StorageKeys.myRegionUid, uid);
+      final started = await startBackgroundMonitoring();
+      if (!started) {
+        await _settings.remove(StorageKeys.myRegionUid);
+        _emitWithMonitoring(myRegionUid: null, monitoringEnabled: false);
+        return false;
+      }
+      _emitWithMonitoring(myRegionUid: uid, monitoringEnabled: true);
+      return true;
+    } on Exception {
+      return false;
+    }
+  }
+
+  Future<void> detectRegionFromLocation() async {
+    try {
+      final uid = await _locationService.detectRegionUid();
+      if (uid == null) {
+        _emitError();
         return;
       }
-
-      final position = await Geolocator.getCurrentPosition(
-        locationSettings: const LocationSettings(
-          accuracy: LocationAccuracy.low,
-          timeLimit: Duration(seconds: 5),
-        ),
-      );
-
-      final placemarks = await placemarkFromCoordinates(
-        position.latitude,
-        position.longitude,
-      );
-
-      if (placemarks.isEmpty) return;
-
-      final region = placemarks.first.administrativeArea ?? '';
-      final uid = _matchRegionToUid(region);
-
-      if (uid != null) {
-        _currentUid = uid;
-        await checkAlert(uid);
-      }
+      await checkAlert(uid);
     } on Exception {
-      // GPS/РЕБ issues — silently fallback to manual selection
+      _emitError();
     }
   }
 
-  String? _matchRegionToUid(String region) {
-    final lower = region.toLowerCase();
-    for (final entry in oblastAssetMap.entries) {
-      final oblastName = _uidToUkrainianName[entry.key]?.toLowerCase() ?? '';
-      if (oblastName.isNotEmpty &&
-          lower.contains(oblastName.split(' ').first)) {
-        return entry.key;
-      }
+  void _emitError() {
+    final currentState = state;
+    emit(
+      RegionAlertsError(
+        '',
+        selectedUid: currentState.selectedUid,
+        myRegionUid: currentState.myRegionUid,
+        monitoringEnabled: currentState.monitoringEnabled,
+      ),
+    );
+  }
+
+  void _emitWithMonitoring({
+    required String? myRegionUid,
+    required bool monitoringEnabled,
+  }) {
+    final currentState = state;
+    switch (currentState) {
+      case RegionAlertsLoaded(:final isAlert, :final alertType):
+        emit(
+          RegionAlertsLoaded(
+            isAlert: isAlert,
+            alertType: alertType,
+            selectedUid: currentState.selectedUid,
+            myRegionUid: myRegionUid,
+            monitoringEnabled: monitoringEnabled,
+          ),
+        );
+      case RegionAlertsLoading(:final previousAlert):
+        emit(
+          RegionAlertsLoading(
+            previousAlert: previousAlert,
+            selectedUid: currentState.selectedUid,
+            myRegionUid: myRegionUid,
+            monitoringEnabled: monitoringEnabled,
+          ),
+        );
+      case RegionAlertsError(:final message):
+        emit(
+          RegionAlertsError(
+            message,
+            selectedUid: currentState.selectedUid,
+            myRegionUid: myRegionUid,
+            monitoringEnabled: monitoringEnabled,
+          ),
+        );
+      case RegionAlertsInitial():
+        emit(
+          RegionAlertsInitial(
+            selectedUid: currentState.selectedUid,
+            myRegionUid: myRegionUid,
+            monitoringEnabled: monitoringEnabled,
+          ),
+        );
     }
-    return null;
   }
 }
-
-const _uidToUkrainianName = <String, String>{
-  '3': 'Хмельницька',
-  '4': 'Вінницька',
-  '5': 'Рівненська',
-  '8': 'Волинська',
-  '9': 'Дніпропетровська',
-  '10': 'Житомирська',
-  '11': 'Закарпатська',
-  '12': 'Запорізька',
-  '13': 'Івано-Франківська',
-  '14': 'Київська',
-  '15': 'Кіровоградська',
-  '16': 'Луганська',
-  '17': 'Миколаївська',
-  '18': 'Одеська',
-  '19': 'Полтавська',
-  '20': 'Сумська',
-  '21': 'Тернопільська',
-  '22': 'Харківська',
-  '23': 'Херсонська',
-  '24': 'Черкаська',
-  '25': 'Чернігівська',
-  '26': 'Чернівецька',
-  '27': 'Львівська',
-  '28': 'Донецька',
-  '29': 'Крим',
-  '30': 'Севастополь',
-  '31': 'Київ',
-};

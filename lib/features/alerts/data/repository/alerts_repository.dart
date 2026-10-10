@@ -6,10 +6,11 @@ import 'package:ua_air_alerts/features/alerts/data/dto/alert_dto.dart';
 import 'package:ua_air_alerts/features/alerts/data/entity/alert_entity.dart';
 import 'package:ua_air_alerts/features/alerts/data/mapper/alert_mapper.dart';
 import 'package:ua_air_alerts/features/alerts/data/repository/api_error.dart';
+import 'package:ua_air_alerts/features/alerts/domain/alerts_gateway.dart';
 
-class AlertsRepository {
+class AlertsRepository implements AlertsGateway {
   AlertsRepository({CacheManager? cacheManager})
-      : _cache = cacheManager ?? DefaultCacheManager();
+    : _cache = cacheManager ?? DefaultCacheManager();
 
   static const _baseUrl = 'https://api.alerts.in.ua';
 
@@ -17,17 +18,23 @@ class AlertsRepository {
 
   String get _token => dotenv.env['API_TOKEN'] ?? '';
 
+  @override
   Future<List<AlertEntity>> getActiveAlerts({bool forceRefresh = false}) async {
-    final data = await _fetchJson('/v1/alerts/active.json',
-        forceRefresh: forceRefresh);
+    final data = await _fetchJson(
+      '/v1/alerts/active.json',
+      forceRefresh: forceRefresh,
+    );
     final alerts = (data['alerts'] as List<dynamic>)
         .map((e) => AlertDto.fromJson(e as Map<String, dynamic>).toEntity())
         .toList();
     return alerts;
   }
 
-  Future<String> getRegionAlertStatus(String uid,
-      {bool forceRefresh = false}) async {
+  @override
+  Future<String> getRegionAlertStatus(
+    String uid, {
+    bool forceRefresh = false,
+  }) async {
     final key = 'region_$uid';
     if (forceRefresh) {
       await _cache.removeFile(key);
@@ -40,8 +47,10 @@ class AlertsRepository {
     return decoded.toString();
   }
 
-  Future<Map<String, dynamic>> _fetchJson(String path,
-      {bool forceRefresh = false}) async {
+  Future<Map<String, dynamic>> _fetchJson(
+    String path, {
+    bool forceRefresh = false,
+  }) async {
     if (forceRefresh) {
       await _cache.removeFile(path);
     }

@@ -1,26 +1,18 @@
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
-import 'package:geolocator/geolocator.dart';
 import 'package:ua_air_alerts/features/alerts/data/service/notification_service.dart';
 
-Future<void> requestAllPermissions() async {
-  // Location
-  var permission = await Geolocator.checkPermission();
-  if (permission == LocationPermission.denied) {
-    await Geolocator.requestPermission();
-  }
-
-  // Notifications
+Future<bool> requestNotificationPermission() async {
   final notifications = await NotificationService.instance;
-
-  // Android 13+
-  await notifications
+  final androidGranted = await notifications
       .resolvePlatformSpecificImplementation<
-          AndroidFlutterLocalNotificationsPlugin>()
+        AndroidFlutterLocalNotificationsPlugin
+      >()
       ?.requestNotificationsPermission();
-
-  // iOS
-  await notifications
+  final iosGranted = await notifications
       .resolvePlatformSpecificImplementation<
-          IOSFlutterLocalNotificationsPlugin>()
+        IOSFlutterLocalNotificationsPlugin
+      >()
       ?.requestPermissions(alert: true, sound: true, badge: true);
+
+  return (androidGranted ?? true) && (iosGranted ?? true);
 }

@@ -6,39 +6,59 @@ import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:ua_air_alerts/features/alerts/data/constants.dart';
 import 'package:ua_air_alerts/features/alerts/data/service/notification_service.dart';
+import 'package:ua_air_alerts/features/alerts/data/service/permissions_service.dart';
+import 'package:ua_air_alerts/features/alerts/domain/alert_status.dart';
+import 'package:ua_air_alerts/features/alerts/domain/alert_transition.dart';
 import 'package:workmanager/workmanager.dart';
 
 const _taskName = 'checkAlertTask';
 const _taskId = 'alertCheck';
 const _baseUrl = 'https://api.alerts.in.ua';
 
-Future<void> initBackgroundService() async {
+bool _backgroundServiceInitialized = false;
+
+Future<bool> initBackgroundService() async {
+  if (_backgroundServiceInitialized) return true;
   try {
     await Workmanager().initialize(callbackDispatcher, isInDebugMode: false);
-  } catch (_) {
-    // Workmanager not supported (e.g. iOS simulator)
+    _backgroundServiceInitialized = true;
+    return true;
+  } on Exception {
+    return false;
   }
 }
 
-Future<void> startBackgroundMonitoring() async {
+Future<bool> startBackgroundMonitoring({bool requestPermission = true}) async {
+  final prefs = await SharedPreferences.getInstance();
+  final uid = prefs.getString(StorageKeys.myRegionUid);
+  final token = prefs.getString(StorageKeys.apiToken);
+  if (uid == null || token == null || token.isEmpty) return false;
+
+  if (!await initBackgroundService()) return false;
+  if (requestPermission && !await requestNotificationPermission()) {
+    return false;
+  }
   try {
     await Workmanager().registerPeriodicTask(
       _taskId,
       _taskName,
-      frequency: const Duration(minutes: 5),
+      frequency: const Duration(minutes: 15),
       constraints: Constraints(networkType: NetworkType.connected),
       existingWorkPolicy: ExistingWorkPolicy.replace,
     );
-  } catch (_) {
-    // Workmanager not supported
+    return true;
+  } on Exception {
+    return false;
   }
 }
 
-Future<void> stopBackgroundMonitoring() async {
+Future<bool> stopBackgroundMonitoring() async {
+  if (!await initBackgroundService()) return false;
   try {
     await Workmanager().cancelByUniqueName(_taskId);
-  } catch (_) {
-    // Workmanager not supported
+    return true;
+  } on Exception {
+    return false;
   }
 }
 
@@ -68,14 +88,15 @@ Future<void> _checkAndNotify() async {
 
     if (response.statusCode != 200) return;
 
-    final body = jsonDecode(response.body);
-    final status = body is String ? body : body.toString();
-    final isAlert = status.contains('A');
+    final status = AlertStatus.parse(jsonDecode(response.body));
+    if (status == AlertStatus.unknown) return;
+
+    final isAlert = status.hasAlert;
     final wasAlert = prefs.getBool(StorageKeys.lastAlertState) ?? false;
 
     await prefs.setBool(StorageKeys.lastAlertState, isAlert);
 
-    if (isAlert && !wasAlert) {
+    if (shouldNotifyForStatus(status, wasAlert: wasAlert)) {
       await _showNotification();
       await _playAlarm();
     }
@@ -87,27 +108,12 @@ Future<void> _checkAndNotify() async {
 Future<void> _showNotification() async {
   final plugin = await NotificationService.instance;
 
-  // Request permission on iOS
-  await plugin
-      .resolvePlatformSpecificImplementation<
-          IOSFlutterLocalNotificationsPlugin>()
-      ?.requestPermissions(alert: true, sound: true, badge: true);
-
-  // Request permission on Android 13+
-  await plugin
-      .resolvePlatformSpecificImplementation<
-          AndroidFlutterLocalNotificationsPlugin>()
-      ?.requestNotificationsPermission();
-
   await plugin.show(
     0,
     'Повітряна тривога!',
     'Будь ласка, пройдіть до укриття',
     const NotificationDetails(
-      iOS: DarwinNotificationDetails(
-        presentAlert: true,
-        presentSound: true,
-      ),
+      iOS: DarwinNotificationDetails(presentAlert: true, presentSound: true),
       android: AndroidNotificationDetails(
         'air_raid_channel',
         'Air Raid Alerts',
