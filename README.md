@@ -1,6 +1,6 @@
 # UA Air Alerts
 
-Real-time air raid alerts monitoring for Ukraine.
+Карта повітряних тривог України (`ukraine_alerts_2026`). Real-time air raid alerts monitoring for Ukraine.
 
 ## Features
 
