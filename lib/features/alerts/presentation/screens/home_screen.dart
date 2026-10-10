@@ -24,8 +24,7 @@ class HomeScreen extends StatelessWidget {
         ),
         child: Center(
           child: Padding(
-            padding:
-                const EdgeInsets.symmetric(horizontal: AppSizes.paddingXL),
+            padding: const EdgeInsets.symmetric(horizontal: AppSizes.paddingXL),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
@@ -48,17 +47,17 @@ class HomeScreen extends StatelessWidget {
                         _FlagButton(
                           asset: 'assets/uk.png',
                           isSelected: isUk,
-                          onTap: () => context
-                              .read<LocaleCubit>()
-                              .setLocale(const Locale('uk')),
+                          onTap: () => context.read<LocaleCubit>().setLocale(
+                            const Locale('uk'),
+                          ),
                         ),
                         const SizedBox(width: AppSizes.paddingL),
                         _FlagButton(
                           asset: 'assets/en.png',
                           isSelected: !isUk,
-                          onTap: () => context
-                              .read<LocaleCubit>()
-                              .setLocale(const Locale('en')),
+                          onTap: () => context.read<LocaleCubit>().setLocale(
+                            const Locale('en'),
+                          ),
                         ),
                       ],
                     );
@@ -74,10 +73,7 @@ class HomeScreen extends StatelessWidget {
 }
 
 class _NavButton extends StatelessWidget {
-  const _NavButton({
-    required this.label,
-    required this.onPressed,
-  });
+  const _NavButton({required this.label, required this.onPressed});
 
   final String label;
   final VoidCallback onPressed;
@@ -135,14 +131,17 @@ class _FlagButton extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.all(4),
         decoration: BoxDecoration(
-          border: isSelected
-              ? Border.all(color: Colors.white, width: 3)
-              : null,
+          border: isSelected ? Border.all(color: Colors.white, width: 3) : null,
           borderRadius: BorderRadius.circular(AppSizes.radiusS),
         ),
         child: ClipRRect(
           borderRadius: BorderRadius.circular(4),
-          child: Image.asset(asset, width: AppSizes.flagWidth, height: AppSizes.flagHeight, fit: BoxFit.cover),
+          child: Image.asset(
+            asset,
+            width: AppSizes.flagWidth,
+            height: AppSizes.flagHeight,
+            fit: BoxFit.cover,
+          ),
         ),
       ),
     );

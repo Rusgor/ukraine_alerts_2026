@@ -152,6 +152,12 @@ abstract class AppLocalizations {
   /// **'Моя область'**
   String get myRegion;
 
+  String get detectMyRegion;
+
+  String get backgroundMonitoringActive;
+
+  String get backgroundMonitoringUnavailable;
+
   /// No description provided for @myRegionSaved.
   ///
   /// In uk, this message translates to:

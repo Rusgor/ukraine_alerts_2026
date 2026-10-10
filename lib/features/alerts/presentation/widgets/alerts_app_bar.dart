@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:ua_air_alerts/features/alerts/presentation/widgets/refresh_button.dart';
+import 'package:ua_air_alerts/l10n/app_localizations.dart';
 import 'package:ua_air_alerts/theme/app_theme.dart';
 
 class AlertsAppBar extends StatelessWidget implements PreferredSizeWidget {
@@ -24,6 +25,7 @@ class AlertsAppBar extends StatelessWidget implements PreferredSizeWidget {
   @override
   Widget build(BuildContext context) {
     final fgColor = foregroundColor ?? AppColors.textDark;
+    final l10n = AppLocalizations.of(context)!;
 
     return AppBar(
       backgroundColor: backgroundColor ?? Colors.transparent,
@@ -40,7 +42,11 @@ class AlertsAppBar extends StatelessWidget implements PreferredSizeWidget {
       actions: [
         ...extraActions,
         if (onRefresh != null)
-          RefreshButton(onRefresh: onRefresh!, color: fgColor),
+          RefreshButton(
+            onRefresh: onRefresh!,
+            color: fgColor,
+            tooltip: l10n.refresh,
+          ),
       ],
     );
   }

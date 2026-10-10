@@ -7,11 +7,13 @@ class RefreshButton extends StatefulWidget {
     super.key,
     required this.onRefresh,
     required this.color,
+    required this.tooltip,
     this.cooldown = const Duration(seconds: 30),
   });
 
   final VoidCallback onRefresh;
   final Color color;
+  final String tooltip;
   final Duration cooldown;
 
   @override
@@ -32,12 +34,15 @@ class _RefreshButtonState extends State<RefreshButton>
       vsync: this,
       duration: const Duration(milliseconds: 300),
     );
-    _scaleAnimation = Tween<double>(begin: 1.0, end: 1.3).animate(
-      CurvedAnimation(parent: _animController, curve: Curves.easeOut),
-    );
+    _scaleAnimation = Tween<double>(
+      begin: 1.0,
+      end: 1.3,
+    ).animate(CurvedAnimation(parent: _animController, curve: Curves.easeOut));
     // Pulse on appear
     Future.delayed(const Duration(milliseconds: 500), () {
-      if (mounted) _animController.forward().then((_) => _animController.reverse());
+      if (mounted) {
+        _animController.forward().then((_) => _animController.reverse());
+      }
     });
   }
 
@@ -65,12 +70,11 @@ class _RefreshButtonState extends State<RefreshButton>
     return ScaleTransition(
       scale: _scaleAnimation,
       child: IconButton(
+        tooltip: widget.tooltip,
         onPressed: _enabled ? _onTap : null,
         icon: Icon(
           Icons.refresh,
-          color: _enabled
-              ? widget.color
-              : widget.color.withValues(alpha: 0.3),
+          color: _enabled ? widget.color : widget.color.withValues(alpha: 0.3),
         ),
       ),
     );

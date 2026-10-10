@@ -6,11 +6,13 @@ class PulseIconButton extends StatefulWidget {
     required this.icon,
     required this.onPressed,
     required this.color,
+    required this.tooltip,
   });
 
   final IconData icon;
   final VoidCallback onPressed;
   final Color color;
+  final String tooltip;
 
   @override
   State<PulseIconButton> createState() => _PulseIconButtonState();
@@ -28,9 +30,10 @@ class _PulseIconButtonState extends State<PulseIconButton>
       vsync: this,
       duration: const Duration(milliseconds: 300),
     );
-    _scale = Tween<double>(begin: 1.0, end: 1.3).animate(
-      CurvedAnimation(parent: _controller, curve: Curves.easeOut),
-    );
+    _scale = Tween<double>(
+      begin: 1.0,
+      end: 1.3,
+    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeOut));
     Future.delayed(const Duration(milliseconds: 500), () {
       if (mounted) _controller.forward().then((_) => _controller.reverse());
     });
@@ -47,6 +50,7 @@ class _PulseIconButtonState extends State<PulseIconButton>
     return ScaleTransition(
       scale: _scale,
       child: IconButton(
+        tooltip: widget.tooltip,
         onPressed: widget.onPressed,
         icon: Icon(widget.icon, color: widget.color),
       ),

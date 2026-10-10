@@ -13,10 +13,12 @@ class RegionStatusBody extends StatelessWidget {
     return switch (state) {
       RegionAlertsInitial() => _InitialBody(),
       RegionAlertsLoading() => const Center(
-          child: CircularProgressIndicator(color: Colors.white),
-        ),
-      RegionAlertsLoaded(:final isAlert, :final alertType) =>
-        _LoadedBody(isAlert: isAlert, alertType: alertType),
+        child: CircularProgressIndicator(color: Colors.white),
+      ),
+      RegionAlertsLoaded(:final isAlert, :final alertType) => _LoadedBody(
+        isAlert: isAlert,
+        alertType: alertType,
+      ),
       RegionAlertsError(:final message) => _ErrorBody(message: message),
     };
   }
@@ -89,19 +91,19 @@ class _LoadedBody extends StatelessWidget {
   }
 
   String _alertTitle(AppLocalizations l10n, String? type) => switch (type) {
-        'air_raid' => l10n.alertTypeAirRaid,
-        'artillery_shelling' => l10n.alertTypeArtillery,
-        'urban_fights' => l10n.alertTypeUrbanFights,
-        'chemical' => l10n.alertTypeChemical,
-        'nuclear' => l10n.alertTypeNuclear,
-        _ => l10n.alertTypeAirRaid,
-      };
+    'air_raid' => l10n.alertTypeAirRaid,
+    'artillery_shelling' => l10n.alertTypeArtillery,
+    'urban_fights' => l10n.alertTypeUrbanFights,
+    'chemical' => l10n.alertTypeChemical,
+    'nuclear' => l10n.alertTypeNuclear,
+    _ => l10n.alertTypeAirRaid,
+  };
 
   String _alertSubtitle(AppLocalizations l10n, String? type) => switch (type) {
-        'chemical' => l10n.alertChemicalShelter,
-        'nuclear' => l10n.alertNuclearShelter,
-        _ => l10n.alertShelter,
-      };
+    'chemical' => l10n.alertChemicalShelter,
+    'nuclear' => l10n.alertNuclearShelter,
+    _ => l10n.alertShelter,
+  };
 }
 
 class _ErrorBody extends StatelessWidget {
@@ -126,12 +128,14 @@ class _ErrorBody extends StatelessWidget {
               color: AppColors.textWhite,
             ),
           ),
-          const SizedBox(height: AppSizes.paddingS),
-          Text(
-            message,
-            textAlign: TextAlign.center,
-            style: const TextStyle(color: AppColors.textMuted),
-          ),
+          if (message.isNotEmpty) ...[
+            const SizedBox(height: AppSizes.paddingS),
+            Text(
+              message,
+              textAlign: TextAlign.center,
+              style: const TextStyle(color: AppColors.textMuted),
+            ),
+          ],
         ],
       ),
     );

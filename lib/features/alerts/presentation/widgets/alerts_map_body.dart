@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:ua_air_alerts/features/alerts/data/entity/alert_entity.dart';
 import 'package:ua_air_alerts/features/alerts/data/entity/oblast_assets.dart';
+import 'package:ua_air_alerts/l10n/app_localizations.dart';
 import 'package:ua_air_alerts/theme/app_theme.dart';
 
 class AlertsMapBody extends StatelessWidget {
@@ -11,14 +12,20 @@ class AlertsMapBody extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SingleChildScrollView(
-      child: Column(
-        children: [
-          _MapSection(alerts: alerts),
-          const SizedBox(height: AppSizes.paddingM),
-          _AlertsList(alerts: alerts),
-        ],
-      ),
+    return CustomScrollView(
+      slivers: [
+        SliverToBoxAdapter(child: _MapSection(alerts: alerts)),
+        const SliverToBoxAdapter(child: SizedBox(height: AppSizes.paddingM)),
+        SliverPadding(
+          padding: const EdgeInsets.symmetric(horizontal: AppSizes.paddingL),
+          sliver: SliverList(
+            delegate: SliverChildBuilderDelegate(
+              (context, index) => _AlertTile(alert: alerts[index]),
+              childCount: alerts.length,
+            ),
+          ),
+        ),
+      ],
     );
   }
 }
@@ -30,35 +37,23 @@ class _MapSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: AppSizes.paddingM),
-      child: Stack(
-        children: [
-          Image.asset('assets/map/ukraine.png', fit: BoxFit.contain),
-          ...alerts.map((alert) {
-            final path = getOblastAssetPath(alert.locationUid);
-            if (path == null) return const SizedBox.shrink();
-            return Positioned.fill(
-              child: Image.asset(path, fit: BoxFit.contain),
-            );
-          }),
-        ],
-      ),
-    );
-  }
-}
-
-class _AlertsList extends StatelessWidget {
-  const _AlertsList({required this.alerts});
-
-  final List<AlertEntity> alerts;
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: AppSizes.paddingL),
-      child: Column(
-        children: alerts.map((alert) => _AlertTile(alert: alert)).toList(),
+    return Semantics(
+      label: AppLocalizations.of(context)!.alertsMap,
+      image: true,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: AppSizes.paddingM),
+        child: Stack(
+          children: [
+            Image.asset('assets/map/ukraine.png', fit: BoxFit.contain),
+            ...alerts.map((alert) {
+              final path = getOblastAssetPath(alert.locationUid);
+              if (path == null) return const SizedBox.shrink();
+              return Positioned.fill(
+                child: Image.asset(path, fit: BoxFit.contain),
+              );
+            }),
+          ],
+        ),
       ),
     );
   }
@@ -71,7 +66,8 @@ class _AlertTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final dateStr = DateFormat('MMM d, yyyy HH:mm:ss').format(alert.startedAt);
+    final locale = Localizations.localeOf(context).toLanguageTag();
+    final dateStr = DateFormat.yMMMd(locale).add_Hms().format(alert.startedAt);
 
     return Container(
       margin: const EdgeInsets.only(bottom: AppSizes.paddingS),
@@ -82,7 +78,10 @@ class _AlertTile extends StatelessWidget {
       ),
       child: Row(
         children: [
-          Icon(_alertIcon(alert.alertType), color: _alertColor(alert.alertType)),
+          Icon(
+            _alertIcon(alert.alertType),
+            color: _alertColor(alert.alertType),
+          ),
           const SizedBox(width: AppSizes.paddingM),
           Expanded(
             child: Column(
@@ -112,20 +111,20 @@ class _AlertTile extends StatelessWidget {
   }
 
   static IconData _alertIcon(String type) => switch (type) {
-        'air_raid' => Icons.warning_amber_rounded,
-        'artillery_shelling' => Icons.gps_fixed,
-        'urban_fights' => Icons.dangerous,
-        'chemical' => Icons.science,
-        'nuclear' => Icons.radio_button_checked,
-        _ => Icons.warning_amber_rounded,
-      };
+    'air_raid' => Icons.warning_amber_rounded,
+    'artillery_shelling' => Icons.gps_fixed,
+    'urban_fights' => Icons.dangerous,
+    'chemical' => Icons.science,
+    'nuclear' => Icons.radio_button_checked,
+    _ => Icons.warning_amber_rounded,
+  };
 
   static Color _alertColor(String type) => switch (type) {
-        'air_raid' => AppColors.alertTypeAirRaid,
-        'artillery_shelling' => AppColors.alertTypeArtillery,
-        'urban_fights' => AppColors.alertTypeUrbanFights,
-        'chemical' => AppColors.alertTypeChemical,
-        'nuclear' => AppColors.alertTypeNuclear,
-        _ => AppColors.alertTypeAirRaid,
-      };
+    'air_raid' => AppColors.alertTypeAirRaid,
+    'artillery_shelling' => AppColors.alertTypeArtillery,
+    'urban_fights' => AppColors.alertTypeUrbanFights,
+    'chemical' => AppColors.alertTypeChemical,
+    'nuclear' => AppColors.alertTypeNuclear,
+    _ => AppColors.alertTypeAirRaid,
+  };
 }

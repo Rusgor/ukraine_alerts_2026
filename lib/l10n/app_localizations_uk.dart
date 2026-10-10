@@ -37,6 +37,17 @@ class AppLocalizationsUk extends AppLocalizations {
   String get myRegion => 'Моя область';
 
   @override
+  String get detectMyRegion => 'Визначити область за місцезнаходженням';
+
+  @override
+  String get backgroundMonitoringActive =>
+      'Фоновий моніторинг увімкнено. Доставка залежить від планувальника операційної системи.';
+
+  @override
+  String get backgroundMonitoringUnavailable =>
+      'Фоновий моніторинг недоступний на цьому пристрої.';
+
+  @override
   String get myRegionSaved => 'Слідкую за цією областю';
 
   @override

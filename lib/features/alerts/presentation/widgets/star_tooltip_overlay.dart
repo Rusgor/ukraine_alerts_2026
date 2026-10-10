@@ -31,9 +31,10 @@ class _StarTooltipOverlayState extends State<StarTooltipOverlay>
       vsync: this,
       duration: const Duration(milliseconds: 800),
     );
-    _bounce = Tween<double>(begin: 0, end: 8).animate(
-      CurvedAnimation(parent: _controller, curve: Curves.easeInOut),
-    );
+    _bounce = Tween<double>(
+      begin: 0,
+      end: 8,
+    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeInOut));
     _checkFirstTime();
   }
 
@@ -112,8 +113,9 @@ class _StarTooltipOverlayState extends State<StarTooltipOverlay>
                               constraints: const BoxConstraints(maxWidth: 220),
                               decoration: BoxDecoration(
                                 color: Colors.white,
-                                borderRadius:
-                                    BorderRadius.circular(AppSizes.radiusM),
+                                borderRadius: BorderRadius.circular(
+                                  AppSizes.radiusM,
+                                ),
                                 boxShadow: const [
                                   BoxShadow(
                                     color: AppColors.dropdownShadow,

@@ -36,6 +36,17 @@ class AppLocalizationsEn extends AppLocalizations {
   String get myRegion => 'My region';
 
   @override
+  String get detectMyRegion => 'Use my location';
+
+  @override
+  String get backgroundMonitoringActive =>
+      'Background checks are enabled. Delivery depends on operating-system scheduling.';
+
+  @override
+  String get backgroundMonitoringUnavailable =>
+      'Background monitoring is unavailable on this device.';
+
+  @override
   String get myRegionSaved => 'Tracking this region';
 
   @override

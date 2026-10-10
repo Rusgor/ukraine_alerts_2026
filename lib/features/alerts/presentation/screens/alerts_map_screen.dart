@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:ua_air_alerts/features/alerts/data/repository/alerts_repository.dart';
+import 'package:ua_air_alerts/features/alerts/domain/alerts_gateway.dart';
 import 'package:ua_air_alerts/features/alerts/presentation/cubit/alerts_map_cubit.dart';
 import 'package:ua_air_alerts/features/alerts/presentation/cubit/alerts_map_state.dart';
 import 'package:ua_air_alerts/features/alerts/presentation/widgets/alerts_map_body.dart';
@@ -14,7 +14,8 @@ class AlertsMapScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (_) => AlertsMapCubit(AlertsRepository())..loadAlerts(),
+      create: (context) =>
+          AlertsMapCubit(context.read<AlertsGateway>())..loadAlerts(),
       child: const _AlertsMapView(),
     );
   }
@@ -36,13 +37,13 @@ class _AlertsMapView extends StatelessWidget {
       body: BlocBuilder<AlertsMapCubit, AlertsMapState>(
         builder: (context, state) => switch (state) {
           AlertsMapLoading() => const Center(
-              child: CircularProgressIndicator(),
-            ),
+            child: CircularProgressIndicator(),
+          ),
           AlertsMapLoaded() => AlertsMapBody(alerts: state.alerts),
           AlertsMapError() => _ErrorView(
-              message: state.message,
-              onRetry: () => context.read<AlertsMapCubit>().loadAlerts(),
-            ),
+            message: state.message,
+            onRetry: () => context.read<AlertsMapCubit>().loadAlerts(),
+          ),
         },
       ),
     );
@@ -67,7 +68,11 @@ class _ErrorView extends StatelessWidget {
           children: [
             const Icon(Icons.error_outline, size: 64, color: AppColors.error),
             const SizedBox(height: AppSizes.paddingL),
-            Text(message, textAlign: TextAlign.center),
+            Text(l10n.errorLoading, textAlign: TextAlign.center),
+            if (message.isNotEmpty) ...[
+              const SizedBox(height: AppSizes.paddingS),
+              Text(message, textAlign: TextAlign.center),
+            ],
             const SizedBox(height: AppSizes.paddingXL),
             ElevatedButton.icon(
               onPressed: onRetry,
