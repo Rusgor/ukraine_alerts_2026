@@ -46,7 +46,6 @@ flutter:
   generate: true
 
   assets:
-    - .env
     - assets/
     - assets/sounds/
     - assets/map/
